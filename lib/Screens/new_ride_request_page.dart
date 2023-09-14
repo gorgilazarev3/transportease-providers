@@ -83,6 +83,7 @@ class _NewRidePageWidgetState extends State<NewRidePageWidget> {
   Timer? timer;
   int duration = 0;
   String durationText = "x минути";
+  String rideType = "regular";
 
   void locatePosition() async {
     MapsLocation.LatLng latLngPosition = MapsLocation.LatLng(
@@ -201,7 +202,9 @@ class _NewRidePageWidgetState extends State<NewRidePageWidget> {
     super.initState();
     _model = createModel(context, () => NewRidePageModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {
+          setRideType();
+        }));
     acceptRideRequest();
   }
 
@@ -210,6 +213,21 @@ class _NewRidePageWidgetState extends State<NewRidePageWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  void setRideType() async {
+    DataSnapshot rideSnap = await providersRef
+        .child(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
+        .child("role")
+        .get();
+    if (rideSnap.exists && rideSnap.value != null) {
+      String valueType = rideSnap.value.toString();
+      List<String> values = valueType.split("_");
+      setState(() {
+        rideType = values[0];
+      });
+      Provider.of<AppData>(context, listen: false).updateRideType(values[0]);
+    }
   }
 
   @override
@@ -738,7 +756,8 @@ class _NewRidePageWidgetState extends State<NewRidePageWidget> {
 
     Navigator.pop(context);
 
-    int fareAmount = MethodsAssistants.calculateFare(destDetails);
+    int fareAmount = MethodsAssistants.calculateFare(
+        destDetails, Provider.of<AppData>(context, listen: false).rideType);
 
     status = "finished";
 

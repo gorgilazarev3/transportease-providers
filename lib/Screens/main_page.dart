@@ -19,7 +19,6 @@ import 'package:transportease_providers/Screens/providers_earnings_page.dart';
 import 'package:transportease_providers/Screens/providers_main_page.dart';
 import 'package:transportease_providers/Screens/providers_ratings_page.dart';
 import 'package:transportease_providers/Screens/requesting_ride_widget.dart';
-import 'package:transportease_providers/Screens/ride_choice_widget.dart';
 import 'package:transportease_providers/Screens/search_destination_component.dart';
 import 'package:transportease_providers/config_maps.dart' as ConfigMap;
 import 'package:transportease_providers/flutter_flow/flutter_flow_util.dart';

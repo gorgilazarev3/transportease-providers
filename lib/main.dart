@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:provider/provider.dart';
 import 'package:transportease_providers/DataHandler/app_data.dart';
 import 'package:transportease_providers/Screens/login_page.dart';
@@ -145,6 +147,12 @@ DatabaseReference rideRequestsRef = FirebaseDatabase.instance
     .child("providers")
     .child(FirebaseAuth.instance.currentUser!.uid)
     .child("newRide");
+
+final geo = GeoFlutterFire();
+final _firestore = FirebaseFirestore.instance;
+
+var availableProvidersRef = _firestore.collection('availableProviders');
+var geoRef = geo.collection(collectionRef: availableProvidersRef);
 
 class TransportEaseApp extends StatefulWidget {
   const TransportEaseApp({super.key});

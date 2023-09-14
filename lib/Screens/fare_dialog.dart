@@ -45,7 +45,7 @@ class _FareDialogWidgetState extends State<FareDialogWidget> {
       onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: Colors.transparent,
         body: SafeArea(
           top: true,
           // child: Column(
@@ -54,7 +54,9 @@ class _FareDialogWidgetState extends State<FareDialogWidget> {
           child: Align(
             alignment: AlignmentDirectional(0, 0),
             child: Container(
-              width: MediaQuery.sizeOf(context).width * 0.8,
+              width: MediaQuery.sizeOf(context).width >= 768
+                  ? MediaQuery.sizeOf(context).width * 0.6
+                  : MediaQuery.sizeOf(context).width * 0.8,
               height: MediaQuery.sizeOf(context).height * 0.4,
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -67,7 +69,9 @@ class _FareDialogWidgetState extends State<FareDialogWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: MediaQuery.sizeOf(context).width * 0.8,
+                        width: MediaQuery.sizeOf(context).width >= 768
+                  ? MediaQuery.sizeOf(context).width * 0.6
+                  : MediaQuery.sizeOf(context).width * 0.8,
                         height: MediaQuery.sizeOf(context).height * 0.07,
                         decoration: BoxDecoration(
                           color: FlutterFlowTheme.of(context).alternate,

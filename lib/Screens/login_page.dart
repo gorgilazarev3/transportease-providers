@@ -649,6 +649,12 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 email: _model.emailAddressController.text,
                 password: _model.passwordController.text));
 
+        showDialog(
+            context: context,
+            builder: ((context) => AlertDialog(
+                  content: Text("Се најавувате. Ве молиме почекајте."),
+                )));
+
         if (firebaseUser != null) {
           DataSnapshot userSnap =
               await providersRef.child(firebaseUser.user!.uid).get();

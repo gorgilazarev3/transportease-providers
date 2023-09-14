@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as MapsLocation;
@@ -83,20 +84,40 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
     //     currentPosition, context);
   }
 
+  void setRideType() async {
+    DataSnapshot rideSnap = await providersRef
+        .child(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
+        .child("role")
+        .get();
+    if (rideSnap.exists && rideSnap.value != null) {
+      String valueType = rideSnap.value.toString();
+      List<String> values = valueType.split("_");
+      Provider.of<AppData>(context, listen: false).updateRideType(values[0]);
+    }
+  }
+
   Future<void> getCurrentProviderInfo() async {
     Provider.of<AppData>(context, listen: false).updateFirebaseUser(
         FirebaseAuth.instance.currentUser ??
             Provider.of<AppData>(context, listen: false).loggedInUser!);
 
+    setRideType();
+
     DataSnapshot driverSnap = await providersRef
         .child(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
         .get();
-    Driver driver = Driver.fromSnapshot(driverSnap);
+    Driver driver = Driver.fromSnapshot(
+        driverSnap, Provider.of<AppData>(context, listen: false).rideType);
     Provider.of<AppData>(context, listen: false).updateDriverInfo(driver);
 
     PushNotificationService pushNotificationService = PushNotificationService();
     pushNotificationService.initialize(context);
     pushNotificationService.getToken(context);
+    MethodsAssistants.retrieveHistory(context);
+  }
+
+  Future<void> initializeProviderInfo() async {
+    await getCurrentProviderInfo();
   }
 
   @override
@@ -105,7 +126,9 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
     _model = createModel(context, () => ProviderMainPageModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
-    getCurrentProviderInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initializeProviderInfo();
+    });
   }
 
   @override
@@ -117,84 +140,90 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
-      child: Stack(
-        children: [
-          GoogleMap(
-            mapType: MapType.normal,
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            zoomGesturesEnabled: true,
-            zoomControlsEnabled: true,
-            gestureRecognizers: Set()
-              ..add(Factory<PanGestureRecognizer>(() => PanGestureRecognizer()))
-              ..add(Factory<ScaleGestureRecognizer>(
-                  () => ScaleGestureRecognizer()))
-              ..add(Factory<TapGestureRecognizer>(() => TapGestureRecognizer()))
-              ..add(Factory<VerticalDragGestureRecognizer>(
-                  () => VerticalDragGestureRecognizer())),
-            initialCameraPosition: _kGooglePlex,
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.sizeOf(context).height * 0.3),
-            onMapCreated: (GoogleMapController controller) => {
-              _controller.complete(controller),
-              googleMapController = controller,
-              locatePosition(),
-              MethodsAssistants.getLoggedInUser(context)
-            },
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                width: MediaQuery.sizeOf(context).width,
-                height: MediaQuery.sizeOf(context).height * 0.1,
-                decoration: BoxDecoration(
-                  color: Color(0x76043B49),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: AlignmentDirectional(0, 0),
-                child: FFButtonWidget(
-                  onPressed: () {
-                    changeProviderStatus();
-                    if (isProviderAvailable) {
-                      updateLiveLocation();
-                    }
-                  },
-                  text: isProviderAvailable
-                      ? 'Статус: Достапен'
-                      : 'Статус: Недостапен - ПРОМЕНИ',
-                  options: FFButtonOptions(
-                    width: isProviderAvailable
-                        ? MediaQuery.sizeOf(context).width * 0.6
-                        : MediaQuery.sizeOf(context).width * 0.7,
-                    height: 45,
-                    padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                    color: isProviderAvailable
-                        ? FlutterFlowTheme.of(context).success
-                        : FlutterFlowTheme.of(context).accent1,
-                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily:
-                              FlutterFlowTheme.of(context).titleSmallFamily,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          useGoogleFonts: GoogleFonts.asMap().containsKey(
-                              FlutterFlowTheme.of(context).titleSmallFamily),
-                        ),
-                    elevation: 3,
-                    borderSide: BorderSide(
-                      color: FlutterFlowTheme.of(context).accent1,
-                      width: 1,
+    return SafeArea(
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).requestFocus(_model.unfocusNode),
+        child: Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.normal,
+              myLocationButtonEnabled: true,
+              myLocationEnabled: true,
+              zoomGesturesEnabled: true,
+              zoomControlsEnabled: true,
+              gestureRecognizers: Set()
+                ..add(
+                    Factory<PanGestureRecognizer>(() => PanGestureRecognizer()))
+                ..add(Factory<ScaleGestureRecognizer>(
+                    () => ScaleGestureRecognizer()))
+                ..add(
+                    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()))
+                ..add(Factory<VerticalDragGestureRecognizer>(
+                    () => VerticalDragGestureRecognizer())),
+              initialCameraPosition: _kGooglePlex,
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.sizeOf(context).height * 0.3),
+              onMapCreated: (GoogleMapController controller) => {
+                _controller.complete(controller),
+                googleMapController = controller,
+                locatePosition(),
+                MethodsAssistants.getLoggedInUser(context)
+              },
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  width: MediaQuery.sizeOf(context).width,
+                  height: MediaQuery.sizeOf(context).height * 0.1,
+                  decoration: BoxDecoration(
+                    color: Color(0x76043B49),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  alignment: AlignmentDirectional(0, 0),
+                  child: FFButtonWidget(
+                    onPressed: () {
+                      changeProviderStatus();
+                      if (isProviderAvailable) {
+                        updateLiveLocation();
+                      }
+                    },
+                    text: isProviderAvailable
+                        ? 'Статус: Достапен'
+                        : 'Статус: Недостапен - ПРОМЕНИ',
+                    options: FFButtonOptions(
+                      width: isProviderAvailable
+                          ? MediaQuery.sizeOf(context).width * 0.6
+                          : MediaQuery.sizeOf(context).width * 0.7,
+                      height: 45,
+                      padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                      iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                      color: isProviderAvailable
+                          ? FlutterFlowTheme.of(context).success
+                          : FlutterFlowTheme.of(context).accent1,
+                      textStyle: FlutterFlowTheme.of(context)
+                          .titleSmall
+                          .override(
+                            fontFamily:
+                                FlutterFlowTheme.of(context).titleSmallFamily,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            useGoogleFonts: GoogleFonts.asMap().containsKey(
+                                FlutterFlowTheme.of(context).titleSmallFamily),
+                          ),
+                      elevation: 3,
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).accent1,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -206,10 +235,19 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
           forceAndroidLocationManager: true);
       currentPosition = position;
       Geofire.initialize("availableProviders");
+      GeoFirePoint myLocation = geo.point(
+          latitude: currentPosition.latitude,
+          longitude: currentPosition.longitude);
       Geofire.setLocation(
           Provider.of<AppData>(context, listen: false).loggedInUser!.uid,
           currentPosition.latitude,
           currentPosition.longitude);
+      await availableProvidersRef
+          .doc(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
+          .set({
+        'name': Provider.of<AppData>(context, listen: false).loggedInUser!.uid,
+        'position': myLocation.data
+      });
 
       rideRequestsRef.set("searching");
       rideRequestsRef.onValue.listen((event) {});
@@ -217,6 +255,10 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
     } else {
       Geofire.removeLocation(
           Provider.of<AppData>(context, listen: false).loggedInUser!.uid);
+
+      availableProvidersRef
+          .doc(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
+          .delete();
       rideRequestsRef.onDisconnect();
       rideRequestsRef.remove();
       Fluttertoast.showToast(msg: "Го променивте вашиот статус во недостапен.");
@@ -232,10 +274,20 @@ class _ProviderMainPageWidgetState extends State<ProviderMainPageWidget> {
         Geolocator.getPositionStream().listen((Position position) {
       currentPosition = position;
       if (isProviderAvailable) {
+        GeoFirePoint myLocation = geo.point(
+            latitude: position.latitude, longitude: position.longitude);
         Geofire.setLocation(
             Provider.of<AppData>(context, listen: false).loggedInUser!.uid,
             position.latitude,
             position.longitude);
+
+        availableProvidersRef
+            .doc(Provider.of<AppData>(context, listen: false).loggedInUser!.uid)
+            .set({
+          'name':
+              Provider.of<AppData>(context, listen: false).loggedInUser!.uid,
+          'position': myLocation.data
+        });
       }
 
       MapsLocation.LatLng latLng =

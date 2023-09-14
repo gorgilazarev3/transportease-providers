@@ -119,25 +119,32 @@ class _RideRequestNotificationWidgetState
                       padding: EdgeInsetsDirectional.fromSTEB(20, 20, 20, 20),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(
                             Icons.my_location,
                             color: FlutterFlowTheme.of(context).secondaryText,
                             size: 30,
                           ),
-                          Text(
-                            rideDetails.pickUpAddress,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily,
-                                  fontWeight: FontWeight.w500,
-                                  useGoogleFonts: GoogleFonts.asMap()
-                                      .containsKey(FlutterFlowTheme.of(context)
-                                          .bodyMediumFamily),
-                                ),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 20.0),
+                              child: Text(
+                                rideDetails.pickUpAddress,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: FlutterFlowTheme.of(context)
+                                          .bodyMediumFamily,
+                                      fontWeight: FontWeight.w500,
+                                      useGoogleFonts: GoogleFonts.asMap()
+                                          .containsKey(
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMediumFamily),
+                                    ),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -146,25 +153,32 @@ class _RideRequestNotificationWidgetState
                       padding: EdgeInsetsDirectional.fromSTEB(20, 20, 20, 20),
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(
                             Icons.location_on,
                             color: FlutterFlowTheme.of(context).secondaryText,
                             size: 30,
                           ),
-                          Text(
-                            rideDetails.destinationAddress,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily,
-                                  fontWeight: FontWeight.w500,
-                                  useGoogleFonts: GoogleFonts.asMap()
-                                      .containsKey(FlutterFlowTheme.of(context)
-                                          .bodyMediumFamily),
-                                ),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 20.0),
+                              child: Text(
+                                rideDetails.destinationAddress,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: FlutterFlowTheme.of(context)
+                                          .bodyMediumFamily,
+                                      fontWeight: FontWeight.w500,
+                                      useGoogleFonts: GoogleFonts.asMap()
+                                          .containsKey(
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMediumFamily),
+                                    ),
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
                           ),
                         ],
                       ),

@@ -179,8 +179,8 @@ class _RegistrationPageWidgetState extends State<RegistrationPageWidget>
                           child: Container(
                             width: double.infinity,
                             height: MediaQuery.sizeOf(context).width >= 768.0
-                                ? 530.0
-                                : 630.0,
+                                ? 1000
+                                : 720.0,
                             constraints: BoxConstraints(
                               maxWidth: 570,
                             ),
@@ -2054,6 +2054,13 @@ class _RegistrationPageWidgetState extends State<RegistrationPageWidget>
         Fluttertoast.showToast(msg: "Настана грешка: " + errMsg);
       }))
           .user;
+
+      showDialog(
+          context: context,
+          builder: ((context) => AlertDialog(
+                content:
+                    Text("Се регистрирате во системот. Ве молиме почекајте."),
+              )));
       if (firebaseUser == null) {
         Fluttertoast.showToast(
             msg:
@@ -2141,6 +2148,11 @@ class _RegistrationPageWidgetState extends State<RegistrationPageWidget>
                 email: _model.emailAddressController2.text,
                 password: _model.passwordController2.text));
 
+        showDialog(
+            context: context,
+            builder: ((context) => AlertDialog(
+                  content: Text("Се најавувате. Ве молиме почекајте."),
+                )));
         if (firebaseUser != null) {
           DataSnapshot userSnap =
               await providersRef.child(firebaseUser.user!.uid).get();
